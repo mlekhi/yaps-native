@@ -119,8 +119,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 50,
     left: 50,
-    width: 50,
-    height: 50,
+    width: 100,
+    height: 100,
     resizeMode: 'contain',
   },
   obstacle: {
@@ -140,13 +140,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     position: 'absolute',
     top: 50,
-    color: 'black',
+    color: 'white',
   },
   level: {
     fontSize: 24,
     position: 'absolute',
     top: 80,
-    color: 'black',
+    color: 'white',
   },
   restartText: {
     fontSize: 24,

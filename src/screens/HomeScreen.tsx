@@ -1,13 +1,39 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import MaskedView from '@react-native-masked-view/masked-view';
 
-const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+interface HomeScreenProps {
+  navigation: any;
+}
+
+const GradientText: React.FC<{ text: string }> = ({ text }) => {
+  return (
+    <MaskedView
+      style={styles.maskedView}
+      maskElement={<Text style={styles.tap}>{text}</Text>}
+    >
+      <Text style={styles.linearGradient}>{text}</Text>
+      <LinearGradient
+        colors={['#4facfe', '#00f2fe']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.linearGradient}
+      />
+    </MaskedView>
+  );
+};
+
+// HomeScreen Component
+const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Image source={{ uri: 'background-landing' }} style={styles.background} />
       <Text style={styles.title}>Yaps</Text>
       <Image source={{ uri: 'dog' }} style={styles.image} />
-      <Button title="Tap to start" onPress={() => navigation.navigate('Game')} />
+      <TouchableOpacity onPress={() => navigation.navigate('Game')}>
+        <GradientText text="Tap to start" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -24,14 +50,30 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   title: {
-    fontSize: 24,
+    fontFamily: 'Daydream',
+    fontSize: 50,
     marginBottom: 20,
   },
   image: {
-    width: 150, // Adjust the width as needed
-    height: 150, // Adjust the height as needed
-    marginBottom: 30, // Spacing between image and button
-    resizeMode: 'contain', // Ensures the image scales correctly
+    width: 300,
+    height: 300,
+    marginBottom: 30,
+    resizeMode: 'contain',
+  },
+  tap: {
+    fontFamily: 'Daydream',
+    fontSize: 18,
+    marginBottom: 20,
+    color: 'transparent', // Make the text transparent to apply the mask correctly
+  },
+  maskedView: {
+    height: 30, // Ensure this matches the text height
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  linearGradient: {
+    width: 150, // Adjust the width to match the text
+    height: 30,  // Ensure the height matches the text size
   },
 });
 
