@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "shrub.png",
+      "filename" : "dog-yap.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "shrub@2x.png",
+      "filename" : "dog-yap@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "shrub@3x.png",
+      "filename" : "dog-yap@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

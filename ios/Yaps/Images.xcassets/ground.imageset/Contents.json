@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "shrub.png",
+      "filename" : "ground 1.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "shrub@2x.png",
+      "filename" : "ground 2.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "shrub@3x.png",
+      "filename" : "ground 3.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
