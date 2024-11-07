@@ -7,6 +7,7 @@ import PauseMenu from './components/PauseMenu';
 import LevelComplete from './components/LevelComplete';
 import GameOverScreen from './components/GameOverScreen';
 import styles from './styles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface GameScreenProps {
   navigation: any;
@@ -35,6 +36,32 @@ const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
 
     return () => backgroundMusic?.stop(() => backgroundMusic.release());
   }, []);
+
+  useEffect(() => {
+    const loadLevel = async () => {
+      try {
+        const savedLevel = await AsyncStorage.getItem('level');
+        if (savedLevel !== null) {
+          setLevel(Number(savedLevel)); // Set the saved level if it exists
+        }
+      } catch (error) {
+        console.error("Failed to load level", error);
+      }
+    };
+    loadLevel();
+  }, []);
+
+  // Save level to AsyncStorage whenever it updates
+  useEffect(() => {
+    const saveLevel = async () => {
+      try {
+        await AsyncStorage.setItem('level', level.toString());
+      } catch (error) {
+        console.error("Failed to save level", error);
+      }
+    };
+    saveLevel();
+  }, [level]);
 
   const animateGround = () => {
     const duration = 5000 / level;
@@ -94,7 +121,7 @@ const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
   }, [score, level]);
 
   const handleScreenPress = () => {
-    setAvatarImageUri('dog-bark');
+    setAvatarImageUri('dog-yap');
     setTimeout(() => {
       setAvatarImageUri('dog');
     }, 500);
@@ -117,7 +144,6 @@ const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
   const handleRestart = () => {
     setGameOver(false);
     setScore(0);
-    setLevel(1);
     setObstacles([]);
     setLevelComplete(false);
     setPaused(false);
@@ -131,6 +157,16 @@ const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
   const handleNextLevel = () => {
     setLevelComplete(false);
     setObstacles([]);
+  };
+
+  const handlePause = () => {
+    setPaused(true);
+    setShowPauseMenu(true);
+  };
+
+  const handleResume = () => {
+    setPaused(false);
+    setShowPauseMenu(false);
   };
 
   return (
@@ -158,7 +194,15 @@ const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
         <Text style={styles.score}>Score: {score}</Text>
         <Text style={styles.level}>Level: {level}</Text>
 
-        {!gameOver && showPauseMenu && <PauseMenu onResume={() => setPaused(false)} />}
+        {!gameOver && !showPauseMenu && !paused && (
+          <Pressable onPress={handlePause}>
+            <Image style={styles.pauseButton} source={{ uri: 'pause' }} />
+          </Pressable>
+        )}
+
+        {showPauseMenu && (
+          <PauseMenu onResume={handleResume} onExitToHome={handleExitToHome} />
+        )}
       </View>
     </Pressable>
   );

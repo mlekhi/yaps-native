@@ -1,18 +1,24 @@
 import React from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Image } from 'react-native';
 import styles from '../styles';
 
 interface PauseMenuProps {
   onResume: () => void;
+  onExitToHome: () => void;
 }
 
-const PauseMenu: React.FC<PauseMenuProps> = ({ onResume }) => {
+const PauseMenu: React.FC<PauseMenuProps> = ({ onResume, onExitToHome }) => {
   return (
     <View style={styles.pauseMenu}>
-      <Text style={styles.pauseMenuText}>Paused</Text>
-      <Pressable onPress={onResume} style={styles.resumeButton}>
-        <Text style={styles.resumeText}>Resume</Text>
-      </Pressable>
+      <Text style={styles.pauseMenuText}>Menu</Text>
+      <View style={styles.subMenu}>
+        <Pressable onPress={onResume} style={styles.restartButton}>
+          <Image source={{ uri: 'play' }} style={styles.restartImage} />
+        </Pressable>
+        <Pressable onPress={onExitToHome} style={styles.exitButton}>
+          <Image source={{ uri: 'x-mark' }} style={styles.exitImage} />
+        </Pressable>
+      </View>
     </View>
   );
 };

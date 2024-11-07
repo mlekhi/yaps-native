@@ -39,9 +39,12 @@ const styles = StyleSheet.create({
   },
   gameOverContainer: {
     position: 'absolute',
-    top: 200,
     justifyContent: 'center',
     alignItems: 'center',
+    // backgroundColor: 'rgba(0,0,0,0.8)',
+    width: '80%',
+    height: '20%',
+    borderRadius: 10,
   },
   gameOverText: {
     fontFamily: 'Daydream',
@@ -92,27 +95,23 @@ const styles = StyleSheet.create({
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    // backgroundColor: 'rgba(0,0,0,0.8)',
     width: '80%',
-    height: '40%',
+    height: '20%',
     borderRadius: 10,
   },
   pauseMenuText: {
-    fontFamily: 'Daydream',
+    fontFamily: "Daydream",
     fontSize: 24,
     color: 'white',
     marginBottom: 20,
   },
-  resumeButton: {
-    padding: 10,
-    backgroundColor: 'green',
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  resumeText: {
-    fontFamily: 'Daydream',
-    color: 'white',
-    fontSize: 16,
+  pauseButton: {
+    width: 25,
+    top: -300,
+    right: 150,
+    height: 25,
+    resizeMode: 'contain',
   },
   score: {
     fontFamily: 'Daydream',
@@ -128,6 +127,10 @@ const styles = StyleSheet.create({
     top: 80,
     color: 'white',
   },
+  subMenu: {
+    flex: 1,
+    flexDirection: 'row',  
+  }
 });
 
 export default styles;

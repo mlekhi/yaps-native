@@ -11,12 +11,14 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({ onRestart, onExitToHome
   return (
     <View style={styles.gameOverContainer}>
       <Text style={styles.gameOverText}>Game Over!</Text>
+      <View style={styles.subMenu}>
       <Pressable onPress={onRestart} style={styles.restartButton}>
         <Image source={{ uri: 'restart' }} style={styles.restartImage} />
       </Pressable>
       <Pressable onPress={onExitToHome} style={styles.exitButton}>
         <Image source={{ uri: 'x-mark' }} style={styles.exitImage} />
       </Pressable>
+      </View>
     </View>
   );
 };
