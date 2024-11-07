@@ -8,7 +8,7 @@ interface HomeScreenProps {
 // GradientText Component using react-native-svg
 const GradientText: React.FC<GradientTextProps> = ({ text, type }) => {
   // Set font size based on the 'type' prop
-  const fontSize = type === 'h1' ? 40 : 20;
+  const fontSize = type === 'h1' ? 55 : 20;
   const height = type === 'h1' ? 60 : 50;
 
   return (
@@ -41,7 +41,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       <Image source={{ uri: 'background-landing' }} style={styles.background} />
       <TouchableOpacity onPress={() => navigation.navigate('Game')}>
       <GradientText text="Yaps" type="h1" />
-      <Image source={{ uri: 'dog' }} style={styles.image} />
+      {/* <Image source={{ uri: 'dog' }} style={styles.image} /> */}
         <GradientText text="Tap to start" />
       </TouchableOpacity>
     </View>

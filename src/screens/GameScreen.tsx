@@ -1,11 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Animated, Image, Pressable } from 'react-native';
+import { View, Text, Pressable, Animated, Image, Dimensions } from 'react-native';
 import Sound from 'react-native-sound';
+import Avatar from './components/Avatar';
+import Obstacles from './components/Obstacles';
+import PauseMenu from './components/PauseMenu';
+import LevelComplete from './components/LevelComplete';
+import GameOverScreen from './components/GameOverScreen';
+import styles from './styles';
 
-const GameScreen: React.FC = () => {
-  const [groundPosition, setGroundPosition] = useState(new Animated.Value(0));
+interface GameScreenProps {
+  navigation: any;
+}
+
+const GameScreen: React.FC<GameScreenProps> = ({ navigation }) => {
+  const screenWidth = Dimensions.get('window').width;
+  const [groundPosition1] = useState(new Animated.Value(0));
+  const [groundPosition2] = useState(new Animated.Value(screenWidth));
   const [obstacles, setObstacles] = useState<{ id: number; position: Animated.Value }[]>([]);
   const [gameOver, setGameOver] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [showPauseMenu, setShowPauseMenu] = useState(false);
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
   const [levelComplete, setLevelComplete] = useState(false);
@@ -14,55 +28,45 @@ const GameScreen: React.FC = () => {
 
   useEffect(() => {
     backgroundMusic = new Sound('background.mp3', Sound.MAIN_BUNDLE, (error) => {
-      if (error) {
-        console.log('Failed to load sound', error);
-        return;
-      }
+      if (error) return;
       backgroundMusic.setNumberOfLoops(-1);
       backgroundMusic.play();
     });
 
-    return () => {
-      if (backgroundMusic) {
-        backgroundMusic.stop(() => backgroundMusic.release());
-      }
-    };
+    return () => backgroundMusic?.stop(() => backgroundMusic.release());
   }, []);
 
-  const obstacleSpeed = 5;
-  const obstacleSpawnInterval = 2000;
+  const animateGround = () => {
+    const duration = 5000 / level;
 
-  useEffect(() => {
-    let gameInterval: NodeJS.Timer;
-    let obstacleInterval: NodeJS.Timer;
-
-    if (!gameOver && !levelComplete) {
-      gameInterval = setInterval(() => {
-        Animated.timing(groundPosition, {
-          toValue: -1000,
-          duration: 5000 / level,
+    // Animate both ground images
+    Animated.loop(
+      Animated.parallel([
+        Animated.timing(groundPosition1, {
+          toValue: -screenWidth,
+          duration: duration,
           useNativeDriver: false,
-        }).start(() => setGroundPosition(new Animated.Value(0)));
-      }, 50);
-
-      obstacleInterval = setInterval(() => {
-        spawnObstacle();
-      }, obstacleSpawnInterval);
-    }
-
-    return () => {
-      clearInterval(gameInterval);
-      clearInterval(obstacleInterval);
-    };
-  }, [gameOver, level, levelComplete]);
+        }),
+        Animated.timing(groundPosition2, {
+          toValue: 0,
+          duration: duration,
+          useNativeDriver: false,
+        }),
+      ]),
+    ).start(() => {
+      // Reset positions for seamless loop
+      groundPosition1.setValue(screenWidth);
+      groundPosition2.setValue(0);
+    });
+  };
 
   useEffect(() => {
-    const levelThreshold = Math.floor(15 * Math.log(level) + 5);
-
-    if (score >= levelThreshold) {
-      setLevelComplete(true);
+    if (!gameOver && !levelComplete && !paused) {
+      animateGround();
+      const interval = setInterval(() => spawnObstacle(), 2000);
+      return () => clearInterval(interval);
     }
-  }, [score, level]);
+  }, [gameOver, level, levelComplete, paused]);
 
   const spawnObstacle = () => {
     const obstacleId = Date.now();
@@ -76,30 +80,21 @@ const GameScreen: React.FC = () => {
       duration: 5000 / level,
       useNativeDriver: false,
     }).start(() => {
-      if (position._value <= 50) {
-        setGameOver(true);
-      }
       setObstacles((prevObstacles) => prevObstacles.filter((obs) => obs.id !== obstacleId));
+      if (position._value <= 50) setGameOver(true);
     });
   };
 
-  const handleRestart = () => {
-    setGameOver(false);
-    setScore(0);
-    setLevel(1);
-    setObstacles([]);
-    setLevelComplete(false);
-  };
+  useEffect(() => {
+    const levelThreshold = Math.floor(15 * Math.log(level) + 5);
+    if (score >= levelThreshold) {
+      setLevel((prevLevel) => prevLevel + 1);
+      setLevelComplete(true);
+    }
+  }, [score, level]);
 
-  const handleNextLevel = () => {
-    setLevel((prevLevel) => prevLevel + 1);
-    setScore(0);
-    setObstacles([]);
-    setLevelComplete(false);
-  };
-
-  const handleAvatarTap = () => {
-    setAvatarImageUri('dog-yap');
+  const handleScreenPress = () => {
+    setAvatarImageUri('dog-bark');
     setTimeout(() => {
       setAvatarImageUri('dog');
     }, 500);
@@ -119,138 +114,54 @@ const GameScreen: React.FC = () => {
     });
   };
 
+  const handleRestart = () => {
+    setGameOver(false);
+    setScore(0);
+    setLevel(1);
+    setObstacles([]);
+    setLevelComplete(false);
+    setPaused(false);
+    setShowPauseMenu(false);
+  };
+
+  const handleExitToHome = () => {
+    navigation.navigate('Home');
+  };
+
+  const handleNextLevel = () => {
+    setLevelComplete(false);
+    setObstacles([]);
+  };
+
   return (
-    <Pressable onPress={handleAvatarTap} style={styles.container}>
+    <Pressable onPress={handleScreenPress} style={styles.container}>
       <View style={styles.container}>
         <Image source={{ uri: 'background' }} style={styles.background} />
-
-        <Animated.View style={[styles.ground, { left: groundPosition }]}>
+        
+        {/* Two ground images to simulate continuous scrolling */}
+        <Animated.View style={[styles.ground, { transform: [{ translateX: groundPosition1 }] }]}>
+          <Image source={{ uri: 'ground' }} style={styles.groundImage} />
+        </Animated.View>
+        <Animated.View style={[styles.ground, { transform: [{ translateX: groundPosition2 }] }]}>
           <Image source={{ uri: 'ground' }} style={styles.groundImage} />
         </Animated.View>
 
-        <Image source={{ uri: avatarImageUri }} style={styles.avatar} />
+        <Avatar avatarImageUri={avatarImageUri} />
+        <Obstacles obstacles={obstacles} />
 
-        {obstacles.map((obstacle) => (
-          <Animated.Image
-            key={obstacle.id}
-            source={{ uri: 'shrub' }}
-            style={[styles.obstacle, { left: obstacle.position }]}
-          />
-        ))}
-
-        {gameOver && <Text style={styles.gameOverText}>Game Over!</Text>}
-        {levelComplete && !gameOver && (
-          <View style={styles.levelCompleteContainer}>
-            <Text style={styles.levelCompleteText}>Level Complete!</Text>
-            <Pressable onPress={handleNextLevel} style={styles.nextLevelButton}>
-              <Text style={styles.nextLevelText}>Next Level</Text>
-            </Pressable>
-          </View>
+        {gameOver && (
+          <GameOverScreen onRestart={handleRestart} onExitToHome={handleExitToHome} />
         )}
+
+        {levelComplete && <LevelComplete onNextLevel={handleNextLevel} />}
 
         <Text style={styles.score}>Score: {score}</Text>
         <Text style={styles.level}>Level: {level}</Text>
 
-        {gameOver && (
-          <Pressable onPress={handleRestart} style={styles.restartButton}>
-            <Image source={{ uri: 'restart' }} style={styles.restartImage} />
-          </Pressable>
-        )}
+        {!gameOver && showPauseMenu && <PauseMenu onResume={() => setPaused(false)} />}
       </View>
     </Pressable>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  background: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-  },
-  ground: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    height: 50,
-  },
-  groundImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'repeat',
-  },
-  avatar: {
-    position: 'absolute',
-    bottom: 50,
-    left: -150,
-    width: 100,
-    height: 100,
-    resizeMode: 'contain',
-  },
-  obstacle: {
-    position: 'absolute',
-    bottom: 50,
-    width: 75,
-    height: 75,
-    resizeMode: 'contain',
-  },
-  gameOverText: {
-    fontFamily: 'Daydream',
-    fontSize: 24,
-    color: 'red',
-    position: 'absolute',
-    top: 200,
-  },
-  levelCompleteContainer: {
-    position: 'absolute',
-    top: 200,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  levelCompleteText: {
-    fontFamily: 'Daydream',
-    fontSize: 24,
-    color: 'green',
-  },
-  nextLevelButton: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: 'blue',
-    borderRadius: 10,
-  },
-  nextLevelText: {
-    color: 'white',
-    fontSize: 18,
-  },
-  score: {
-    fontFamily: 'Daydream',
-    fontSize: 24,
-    position: 'absolute',
-    top: 50,
-    color: 'white',
-  },
-  level: {
-    fontFamily: 'Daydream',
-    fontSize: 24,
-    position: 'absolute',
-    top: 80,
-    color: 'white',
-  },
-  restartButton: {
-    position: 'absolute',
-    top: 300,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  restartImage: {
-    width: 100,
-    height: 100,
-    resizeMode: 'contain',
-  },
-});
 
 export default GameScreen;
